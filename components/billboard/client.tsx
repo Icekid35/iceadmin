@@ -36,7 +36,7 @@ const BillboardClient = ({ data }: BillboardClientProps) => {
       <DataTable searchKey="label" columns={Columns} data={data} />
       <Heading title="API" description="API calls for billboards" />
       <Separator />
-      <ApiList entityName="billboards" entityIdName="billboardId" />
+      {/* <ApiList entityName="billboards" entityIdName="billboardId" /> */}
     </>
   );
 };

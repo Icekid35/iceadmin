@@ -62,7 +62,7 @@ const CategoryForm = ({ initialData }: CategoryFormProps) => {
       // billboardId: "",
     },
   });
-  const user = useUser();
+  const {user} = useUser();
 
   const onSubmit = async (data: CategoryFormValues) => {
     try {

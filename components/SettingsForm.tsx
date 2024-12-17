@@ -44,7 +44,7 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: initialData,
   });
-  const user = useUser();
+  const {user} = useUser();
 
   const onSubmit = async (data: SettingsFormValues) => {
     try {

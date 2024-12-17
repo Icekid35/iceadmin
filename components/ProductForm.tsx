@@ -87,7 +87,7 @@ const ProductForm = ({
     },
   });
 
-  const user = useUser();
+  const {user} = useUser();
   // user = user?.id ? user : { id: "user_2qD6Z3k9fUqNxTznfcJFj0TTK7a" };
 
   const onSubmit = async (data: ProductFormValues) => {

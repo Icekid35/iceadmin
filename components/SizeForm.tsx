@@ -50,7 +50,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
       value: "",
     },
   });
-  const user = useUser();
+  const {user} = useUser();
 
 
   const onSubmit = async (data: SizeFormValues) => {

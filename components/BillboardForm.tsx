@@ -62,7 +62,7 @@ const BillboardForm = ({ initialData, categories = []}: BillboardFormProps) => {
     },
   });
 
-  const user = useUser();
+  const {user} = useUser();
 
 const onSubmit = async (data: BillboardFormValues) => {
     try {

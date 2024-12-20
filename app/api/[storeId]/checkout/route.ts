@@ -1,8 +1,7 @@
-import Stripe from "stripe";
+// import Stripe from "stripe";
 import { NextResponse } from "next/server";
-
 import prismadb from "@/lib/prismadb";
-import { stripe } from "@/lib/stripe";
+// import { stripe } from "@/lib/stripe";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*", // allow requests from any other domain
@@ -13,82 +12,84 @@ const corsHeaders = {
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders });
 }
-export async function POST(
-  req: Request,
-  { params }: { params: { storeId: string } }
-) {
-  const { productIds } = await req.json();
 
-  if (!productIds || productIds.length === 0) {
-    return new NextResponse("ProductIds are required", { status: 400 });
-  }
-
-  const products = await prismadb.product.findMany({
-    where: {
-      id: {
-        in: productIds,
-      },
-    },
-    include: {
-      images: true,
-    },
-  });
-
-  const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-  products.forEach((item) => {
-    line_items.push({
-      quantity: 1,
-      price_data: {
-        currency: "USD",
-        product_data: {
-          name: item.name,
-          images: item.images.map((image) => image.url),
-        },
-        unit_amount: Number(item.price) * 100,
-      },
-      adjustable_quantity: {
-        enabled: true,
-        minimum: 1,
-      },
-    });
-  });
-
-  const order = await prismadb.order.create({
-    data: {
-      storeId: params.storeId,
-      isPaid: false,
-      orderItems: {
-        create: productIds.map((productId: string) => ({
-          product: {
-            connect: {
-              id: productId,
-            },
-          },
-        })),
-      },
-    },
-  });
-
+export async function POST(req: Request, { params }: { params: { storeId: string } }) {
   try {
-    const session = await stripe.checkout.sessions.create({
-      line_items,
-      mode: "payment",
-      submit_type: "pay",
-      billing_address_collection: "required",
-      phone_number_collection: {
-        enabled: true,
+    // Parse request body
+    const { orders,phone,email,address,name } = await req.json();
+
+    // Validate input
+    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+      return NextResponse.json({ error: "Orders are required" }, { status: 400 });
+    }
+
+    if (!params.storeId) {
+      return NextResponse.json({ error: "Store ID is required" }, { status: 400 });
+    }
+
+    // Map order items for Prisma
+    const orderItemsData = orders.map((order: any) => {
+      if (!order.productId || !order.quantity || !order.price) {
+        throw new Error("Each order must have a productId, quantity, and price");
+      }
+      return {
+        productId: order.productId,
+        quantity: order.quantity,
+        price: order.price,
+        total: order.quantity * order.price,
+        title: order.title,
+        image: order.image,
+        colors: order.colors || [],
+        sizes: order.sizes || [],
+        discountPercentage: order.discountPercentage || null,
+        status: order.status || "active",
+        isCancellable: order.isCancellable || true,
+        placedAt: new Date(),
+      };
+    });
+
+    // Create order in the database
+    const order = await prismadb.order.create({
+      data: {
+        storeId: params.storeId,
+        isPaid: true, // Assuming payment is successful for this example
+        phone,
+        address,
+        email,
+        name,
+        orderItems: {
+          create: orderItemsData,
+        },
       },
-      cancel_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cart?canceled=1`,
-      success_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cart?success=1`,
-      metadata: {
-        orderId: order.id,
+      include: {
+        orderItems: true,
       },
     });
-    return NextResponse.json({ url: session.url }, { headers: corsHeaders });
-  } catch (error) {
-    return new NextResponse("Failed to create create a payment", {
-      status: 500,
-      statusText: "server error",
-    });
+
+    // Optionally integrate with Stripe for payment processing
+    // const line_items = orderItemsData.map((item) => ({
+    //   quantity: item.quantity,
+    //   price_data: {
+    //     currency: "USD",
+    //     product_data: {
+    //       name: item.title,
+    //       images: [item.image],
+    //     },
+    //     unit_amount: item.price * 100, // Stripe requires the amount in cents
+    //   },
+    // }));
+
+    // const session = await stripe.checkout.sessions.create({
+    //   payment_method_types: ["card"],
+    //   line_items,
+    //   mode: "payment",
+    //   success_url: `${process.env.NEXT_PUBLIC_STORE_URL}/success`,
+    //   cancel_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cancel`,
+    // });
+
+    return NextResponse.json({ order }, { headers: corsHeaders });
+  } catch (error: any) {
+    console.error("Error creating order:", error);
+    return NextResponse.json({ error: error.message || "Failed to create order" }, { status: 500 });
   }
 }

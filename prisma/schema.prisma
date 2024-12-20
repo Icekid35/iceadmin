@@ -105,6 +105,8 @@ model Order {
   isPaid Boolean @default(false)
   phone String @default("")
   address String @default("")
+  email String @default("")
+  name String @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   orderItems OrderItem[]
@@ -115,7 +117,19 @@ model OrderItem {
   id String @id @default(uuid()) @map("_id") @db.String
   orderId String @db.String()
   productId String @db.String()
-
+  
+  image    String   // Product image URL
+  colors   String[]
+  sizes   String[]
+  discountPercentage Float? // Optional discount percentage
+  title    String   // Name of the product
+  quantity Int      // Quantity ordered
+  price    Float    // Price per unit
+  total    Float    // Total price (price * quantity)
+  status   String   // Order status ("active", "delivered")
+  isCancellable Boolean // Whether the order can be cancelled
+  placedAt DateTime // Date and time the order was placed
+  createdAt DateTime @default(now())
   product Product @relation(fields: [productId], references: [id])
   order Order @relation(fields: [orderId], references: [id])
 }

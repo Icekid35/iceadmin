@@ -26,7 +26,7 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     address: order.address,
     isPaid: order.isPaid,
     products: order.orderItems
-      .map((orderItem) => `${orderItem.quantity} ${orderItem.title}\n${orderItem.colors.length>0?"colors: ":""}${orderItem.colors.join(" ,")}\n${orderItem.sizes.length>0?"sizes: ":""}${orderItem.sizes.join(" ,")}`)
+      .map((orderItem) => `${orderItem.quantity} ${orderItem.title}${orderItem.colors.length>0?"\ncolors: ":"\n"}${orderItem.colors.join(" ,")}${orderItem.sizes.length>0?"\nsizes: ":"\n"}${orderItem.sizes.join(" ,")}`)
       .join(",\n"),
     totalPrice: priceFormat.format(order.orderItems.reduce(
       (acc, orderItem) => acc + orderItem.total,

@@ -37,6 +37,9 @@ export async function POST(req: Request, {params}: { params: { storeId: string}}
                 categoryId,
                 storeId: params.storeId,
                 
+            },
+            include:{
+                category:true
             }
         })
         return NextResponse.json(billboard);
@@ -56,6 +59,9 @@ export async function GET(req: Request, {params}: { params: { storeId: string}})
         ({
             where: {
                 storeId: params.storeId
+            },
+            include:{
+                category:true
             }
         })
         return NextResponse.json(billboards, { headers: corsHeaders });

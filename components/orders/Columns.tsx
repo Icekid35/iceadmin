@@ -30,10 +30,7 @@ export const Columns: ColumnDef<OrderColumn>[] = [
         accessorKey: "email",
         header: "Email",
     },
-    {
-        accessorKey: "email",
-        header: "Email",
-    },
+
     {
         accessorKey: "address",
         header: "Address",

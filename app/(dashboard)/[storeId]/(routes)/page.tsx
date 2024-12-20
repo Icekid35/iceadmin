@@ -62,14 +62,14 @@ const DashboardPage = async ({ params }: DashboardPageProps) => {
             </CardContent>
           </Card>
         </div>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
-            {/* <Overview data={graphData} /> */}
+           <Overview data={graphData} /> 
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

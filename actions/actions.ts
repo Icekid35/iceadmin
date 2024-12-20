@@ -12,17 +12,13 @@ export const getTotalRevenue = async (storeId: string) => {
       isPaid: true,
     },
     include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
+      orderItems:true
     },
   });
 
   const totalRevenue = paidOrders.reduce((total, order) => {
     const orderTotal = order.orderItems.reduce((orderSum, item) => {
-      return (item.product.discount ? (orderSum +(item.product.price - ((item.product.discount/100) * item.product.price))):(orderSum + item.product.price));
+      return (orderSum + item.total);
     }, 0);
     return orderTotal + total;
   }, 0);
